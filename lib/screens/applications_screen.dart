@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:lad_admin/providers/dashboard_provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:lad_admin/models/application.dart';
+import 'package:lad_admin/widgets/application_card.dart';
+import 'package:lad_admin/providers/dashboard_provider.dart';
 
 final filterStatusProvider = StateProvider<String?>((ref) => null);
 
-final filteredApplicationsProvider = FutureProvider((ref) async {
+final filteredApplicationsProvider = FutureProvider<List<Application>>((ref) async {
   final api = ref.watch(apiClientProvider);
   final status = ref.watch(filterStatusProvider);
   
@@ -15,8 +17,7 @@ final filteredApplicationsProvider = FutureProvider((ref) async {
   
   final response = await api.get('/admin/applications', queryParameters: queryParams);
   final data = response.data['applications'] as List;
-  // We can reuse the model here or define a specific fetch relative to parameters
-  return data; // Simple list for now, we could map to Application models
+  return data.map((e) => Application.fromJson(e)).toList();
 });
 
 class ApplicationsScreen extends ConsumerWidget {
@@ -26,28 +27,39 @@ class ApplicationsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final applicationsAsync = ref.watch(filteredApplicationsProvider);
     final currentFilter = ref.watch(filterStatusProvider);
-    final bool isDesktop = MediaQuery.of(context).size.width >= 800;
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final bool isDesktop = screenWidth >= 800;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9F5),
       appBar: isDesktop ? null : AppBar(
         title: const Text('Все заявки'),
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.white,
         actions: [
           _buildFilterButton(context, ref, currentFilter),
+          const SizedBox(width: 8),
         ],
       ),
       body: Center(
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 1000),
+          constraints: const BoxConstraints(maxWidth: 1400),
           child: Column(
             children: [
               if (isDesktop) 
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 32, 24, 16),
+                  padding: const EdgeInsets.fromLTRB(32, 48, 32, 24),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('Все заявки', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold)),
+                      const Text(
+                        'Все заявки', 
+                        style: TextStyle(
+                          fontSize: 36, 
+                          fontWeight: FontWeight.w900,
+                          color: Color(0xFF1B2C16),
+                        )
+                      ),
                       _buildFilterButton(context, ref, currentFilter),
                     ],
                   ),
@@ -56,23 +68,29 @@ class ApplicationsScreen extends ConsumerWidget {
                 child: RefreshIndicator(
                   onRefresh: () => ref.refresh(filteredApplicationsProvider.future),
                   child: applicationsAsync.when(
-                    data: (apps) => ListView.builder(
-                      padding: const EdgeInsets.all(16),
-                      itemCount: apps.length,
-                      itemBuilder: (context, index) {
-                        final app = apps[index];
-                        final date = DateFormat('dd.MM HH:mm').format(DateTime.parse(app['createdAt']));
-                        return Card(
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                          child: ListTile(
-                            title: Text(app['name'], style: const TextStyle(fontWeight: FontWeight.bold)),
-                            subtitle: Text('$date • ${app['source']}'),
-                            trailing: _buildStatusBadge(app['status']),
-                            onTap: () => context.push('/applications/${app['id']}'),
-                          ),
-                        );
-                      },
-                    ),
+                    data: (apps) {
+                      if (apps.isEmpty) {
+                        return const Center(child: Text("Заявок не найдено"));
+                      }
+                      
+                      return GridView.builder(
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: screenWidth > 1200 ? 3 : (screenWidth > 700 ? 2 : 1),
+                          crossAxisSpacing: 24,
+                          mainAxisSpacing: 24,
+                          mainAxisExtent: 380,
+                        ),
+                        itemCount: apps.length,
+                        itemBuilder: (context, index) {
+                          final app = apps[index];
+                          return ApplicationCard(
+                            application: app,
+                            onTap: () => context.push('/applications/${app.id}'),
+                          );
+                        },
+                      );
+                    },
                     loading: () => const Center(child: CircularProgressIndicator()),
                     error: (err, st) => Center(child: Text('Error: $err')),
                   ),
@@ -100,25 +118,4 @@ class ApplicationsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildStatusBadge(String status) {
-    Color color;
-    switch (status) {
-      case 'new': color = Colors.orange; break;
-      case 'in_progress': color = Colors.blue; break;
-      case 'completed': color = Colors.green; break;
-      case 'rejected': color = Colors.red; break;
-      default: color = Colors.grey;
-    }
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(
-        status,
-        style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.bold),
-      ),
-    );
-  }
 }

@@ -3,6 +3,8 @@ import 'package:crypto/crypto.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
+  static String? _inMemoryToken;
+
   static String hashPassword(String password) {
     final input = 'lad-admin:$password';
     final bytes = utf8.encode(input);
@@ -11,22 +13,18 @@ class AuthService {
   }
 
   static Future<void> saveToken(String token) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('admin_token', token);
+    _inMemoryToken = token;
   }
 
   static Future<String?> getToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('admin_token');
+    return _inMemoryToken;
   }
 
   static Future<void> logout() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('admin_token');
+    _inMemoryToken = null;
   }
 
   static Future<bool> isAuthenticated() async {
-    final token = await getToken();
-    return token != null;
+    return _inMemoryToken != null;
   }
 }

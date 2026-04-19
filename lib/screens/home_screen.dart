@@ -4,6 +4,7 @@ import 'package:lad_admin/providers/dashboard_provider.dart';
 import 'package:lad_admin/core/auth_service.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:lad_admin/widgets/application_card.dart';
 
 import 'package:lad_admin/core/update_service.dart';
 
@@ -123,7 +124,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 16),
-                    ...data.applications.take(5).map((app) => _buildApplicationCard(context, app)),
+                    ...data.applications.take(5).map((app) => Padding(
+                      padding: const EdgeInsets.only(bottom: 16.0),
+                      child: ApplicationCard(
+                        application: app, 
+                        onTap: () => context.push('/applications/${app.id}'),
+                      ),
+                    )),
                     const SizedBox(height: 16),
                     Center(
                       child: TextButton(
@@ -180,36 +187,4 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  Widget _buildApplicationCard(BuildContext context, dynamic app) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: ListTile(
-        title: Text(app.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-        subtitle: Text('${app.contactMethod}: ${app.contactValue ?? "-"}'),
-        trailing: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          decoration: BoxDecoration(
-            color: _getStatusColor(app.status).withOpacity(0.2),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Text(
-            app.status,
-            style: TextStyle(color: _getStatusColor(app.status), fontSize: 12, fontWeight: FontWeight.bold),
-          ),
-        ),
-        onTap: () => context.push('/applications/${app.id}'),
-      ),
-    );
-  }
-
-  Color _getStatusColor(String status) {
-    switch (status) {
-      case 'new': return Colors.orange;
-      case 'in_progress': return Colors.blue;
-      case 'completed': return Colors.green;
-      case 'rejected': return Colors.red;
-      default: return Colors.grey;
-    }
-  }
 }

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:lad_admin/core/auth_service.dart';
+
 class NavigationShell extends StatelessWidget {
   final Widget child;
   const NavigationShell({super.key, required this.child});
@@ -71,9 +73,10 @@ class NavigationShell extends StatelessWidget {
       leading: Icon(icon, color: isSelected ? const Color(0xFF4A6741) : Colors.grey),
       title: Text(label, style: TextStyle(color: isSelected ? const Color(0xFF4A6741) : Colors.black, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
       selected: isSelected,
-      onTap: () {
+      onTap: () async {
         if (isLogout) {
-          context.go(route);
+          await AuthService.logout();
+          if (context.mounted) context.go('/login');
         } else {
           context.go(route);
         }

@@ -26,36 +26,30 @@ class _ApplicationCardState extends State<ApplicationCard> {
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
-      child: AnimatedContainer(
+      child: AnimatedScale(
+        scale: _isHovered ? 1.015 : 1.0,
         duration: const Duration(milliseconds: 200),
-        curve: Curves.easeInOut,
-        transform: _isHovered 
-            ? (Matrix4.identity()..translate(0, -4, 0))
-            : Matrix4.identity(),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(32),
-          border: Border.all(
-            color: _isHovered 
-                ? const Color(0xFF4A6741).withOpacity(0.3)
-                : const Color(0xFFE8EDE4).withOpacity(0.5),
-          ),
-          boxShadow: [
-            BoxShadow(
+        curve: Curves.easeOutCubic,
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(32),
+            border: Border.all(
               color: _isHovered 
-                  ? Colors.black.withOpacity(0.12)
-                  : Colors.black.withOpacity(0.04),
-              blurRadius: _isHovered ? 24 : 8,
-              offset: Offset(0, _isHovered ? 8 : 2),
+                  ? const Color(0xFF4A6741).withOpacity(0.4)
+                  : const Color(0xFFE8EDE4),
+              width: _isHovered ? 1.5 : 1.0,
             ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(32),
-          child: InkWell(
-            onTap: widget.onTap,
-            hoverColor: Colors.transparent,
-            splashColor: const Color(0xFF4A6741).withOpacity(0.05),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF1B2C16).withOpacity(_isHovered ? 0.12 : 0.04),
+                blurRadius: _isHovered ? 32 : 12,
+                offset: Offset(0, _isHovered ? 12 : 4),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(30), // slightly smaller to avoid bleed
             child: Stack(
               children: [
                 // Background Gradient Header
@@ -65,21 +59,26 @@ class _ApplicationCardState extends State<ApplicationCard> {
                   right: 0,
                   height: 110,
                   child: Container(
-                    decoration: const BoxDecoration(
+                    decoration: BoxDecoration(
                       gradient: LinearGradient(
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                         colors: [
-                          Color(0xFFE8EDE4), // sage-light
-                          Color(0xFFF9F7F2), // cream
-                          Colors.transparent,
+                          const Color(0xFFE8EDE4).withOpacity(0.8),
+                          const Color(0xFFF9F7F2).withOpacity(0.4),
+                          const Color(0xFFF9F7F2).withOpacity(0),
                         ],
                       ),
                     ),
                   ),
                 ),
-                
-                Padding(
+                Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: widget.onTap,
+                    hoverColor: Colors.transparent,
+                    splashColor: const Color(0xFF4A6741).withOpacity(0.05),
+                    child: Padding(
                   padding: const EdgeInsets.all(24.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -228,7 +227,7 @@ class _ApplicationCardState extends State<ApplicationCard> {
                         ),
                         child: _buildStatusRow(app.status),
                       ),
-                    ],
+                    ),
                   ),
                 ),
               ],

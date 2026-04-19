@@ -39,14 +39,14 @@ jobs:
 
       - name: Compile Inno Setup Installer
         run: |
-          & "C:\Program Files (x86)\Inno Setup 6\iscc.exe" windows/runner/inno_setup.iss
+          & "C:\Program Files (x86)\Inno Setup 6\iscc.exe" inno_setup.iss
 
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           files: |
             lad_admin_update.zip
-            windows/runner/Output/LadAdminSetup.exe
+            Output/LadAdminSetup.exe
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}

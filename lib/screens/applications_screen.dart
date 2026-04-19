@@ -79,7 +79,7 @@ class ApplicationsScreen extends ConsumerWidget {
                           crossAxisCount: screenWidth > 1200 ? 3 : (screenWidth > 700 ? 2 : 1),
                           crossAxisSpacing: 24,
                           mainAxisSpacing: 24,
-                          mainAxisExtent: 380,
+                          mainAxisExtent: 440,
                         ),
                         itemCount: apps.length,
                         itemBuilder: (context, index) {

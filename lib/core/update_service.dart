@@ -42,6 +42,7 @@ class UpdateService {
       if (!Platform.isWindows) return null;
 
       _dio.options.headers['Accept'] = 'application/vnd.github.v3+json';
+      _dio.options.headers['User-Agent'] = 'lad-admin-updater';
       final response = await _dio.get(updateApiUrl);
       
       if (response.statusCode == 200) {
@@ -53,7 +54,15 @@ class UpdateService {
         final assets = data['assets'] as List<dynamic>?;
         if (assets == null || assets.isEmpty) return null;
         
-        final downloadUrl = assets[0]['browser_download_url'] as String? ?? '';
+        // Find the ZIP asset specifically
+        final zipAsset = assets.firstWhere(
+          (a) => (a['name'] as String).endsWith('.zip'),
+          orElse: () => null,
+        );
+        
+        if (zipAsset == null) return null;
+        
+        final downloadUrl = zipAsset['browser_download_url'] as String? ?? '';
         final releaseNotes = data['body'] as String? ?? '';
 
         final updateInfo = UpdateInfo(

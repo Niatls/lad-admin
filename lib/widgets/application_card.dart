@@ -227,16 +227,17 @@ class _ApplicationCardState extends State<ApplicationCard> {
                         ),
                         child: _buildStatusRow(app.status),
                       ),
-                    ),
+                    ],
                   ),
                 ),
-              ],
+              ),
             ),
-          ),
+          ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildMiniInfo(String label, String value) {
     return Container(

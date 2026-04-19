@@ -211,7 +211,7 @@ class _ApplicationCardState extends State<ApplicationCard> {
                         runSpacing: 12,
                         children: [
                           _buildMiniInfo("Время", app.preferredTime ?? "Любое"),
-                          _buildMiniInfo("Связь", app.contactMethod),
+                          _buildMiniInfo("Связь", app.contactMethod ?? "Не указан"),
                           _buildMiniInfo("Дата", DateFormat('dd.MM.yyyy').format(app.createdAt)),
                         ],
                       ),

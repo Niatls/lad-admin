@@ -32,11 +32,12 @@ jobs:
           cd build\windows\x64\runner\Release
           Compress-Archive -Path * -DestinationPath ..\..\..\..\..\lad_admin_update.zip
 
+      - name: Install Inno Setup
+        run: choco install innosetup -y
+
       - name: Compile Inno Setup Installer
-        uses: crazy-max/ghaction-innosetup@v2
-        with:
-          script: windows/runner/inno_setup.iss
-          folder: windows/runner/Output
+        run: |
+          & "C:\Program Files (x86)\Inno Setup 6\iscc.exe" windows/runner/inno_setup.iss
 
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2

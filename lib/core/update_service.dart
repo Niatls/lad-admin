@@ -108,35 +108,41 @@ class UpdateService {
   }
 
   // Applies the update by downloading the ZIP, extracting it, generating a batch replacing script, and restarting.
-  Future<void> applyUpdate(UpdateInfo updateInfo, Function(double) onProgress) async {
+  Future<void> applyUpdate(UpdateInfo updateInfo, Function(double progress, String status) onProgress) async {
     try {
       final tempDir = await getTemporaryDirectory();
       final zipPath = p.join(tempDir.path, 'lad_admin_update.zip');
       final extractDir = p.join(tempDir.path, 'lad_admin_extracted');
 
-      // 1. Download ZIP
+      // 1. Download ZIP (0% - 80% of total progress)
       debugPrint('[UpdateService] Downloading update to $zipPath');
       await _dio.download(
         updateInfo.downloadUrl,
         zipPath,
         onReceiveProgress: (count, total) {
           if (total > 0) {
-            onProgress(count / total);
+            onProgress((count / total) * 0.8, "Загрузка обновления...");
           }
         },
       );
 
       // 2. Clear old extraction if exists
+      onProgress(0.81, "Подготовка к установке...");
       final extractDirFile = Directory(extractDir);
       if (await extractDirFile.exists()) {
         await extractDirFile.delete(recursive: true);
       }
       await extractDirFile.create();
 
-      // 3. Extract the ZIP using archive
+      // 3. Extract the ZIP using archive (80% - 95% of total progress)
       debugPrint('[UpdateService] Extracting update...');
+      onProgress(0.82, "Распаковка файлов...");
+      
       final bytes = await File(zipPath).readAsBytes();
       final archive = ZipDecoder().decodeBytes(bytes);
+      
+      final totalFiles = archive.length;
+      int extractedCount = 0;
       
       for (final file in archive) {
         final filename = file.name;
@@ -148,7 +154,13 @@ class UpdateService {
         } else {
           Directory(p.join(extractDir, filename)).createSync(recursive: true);
         }
+        
+        extractedCount++;
+        // Extraction is 15% of total progress (from 0.82 to 0.97)
+        onProgress(0.82 + (extractedCount / totalFiles) * 0.15, "Распаковка: $filename");
       }
+
+      onProgress(0.98, "Финализация...");
 
       // If the extracted zip has a parent folder (e.g. lad_admin/...), detect it.
       // We want to copy the contents of the built folder, not the parent folder.

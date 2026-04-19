@@ -46,6 +46,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         return StatefulBuilder(builder: (context, setState) {
           bool isDownloading = false;
           double progress = 0;
+          String statusText = "Загрузка...";
 
           return AlertDialog(
             title: Text('Доступно обновление ${updateInfo.version}'),
@@ -57,10 +58,46 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ? updateInfo.releaseNotes 
                   : 'Появилась новая версия приложения. Рекомендуем обновиться!'),
                 if (isDownloading) ...[
-                  const SizedBox(height: 20),
-                  LinearProgressIndicator(value: progress),
-                  const SizedBox(height: 8),
-                  Text('Загрузка: ${(progress * 100).toStringAsFixed(0)}%'),
+                  const SizedBox(height: 24),
+                  Row(
+                    children: [
+                      const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          statusText,
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.grey[700],
+                            fontWeight: FontWeight.w500,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      Text(
+                        '${(progress * 100).toStringAsFixed(0)}%',
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: LinearProgressIndicator(
+                      value: progress,
+                      minHeight: 8,
+                      backgroundColor: Colors.grey[200],
+                      valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF4A6741)),
+                    ),
+                  ),
                 ]
               ],
             ),
@@ -75,8 +112,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   onPressed: () async {
                     setState(() => isDownloading = true);
                     try {
-                      await UpdateService().applyUpdate(updateInfo, (p) {
-                        setState(() => progress = p);
+                      await UpdateService().applyUpdate(updateInfo, (p, s) {
+                        setState(() {
+                          progress = p;
+                          statusText = s;
+                        });
                       });
                     } catch (e) {
                       setState(() => isDownloading = false);

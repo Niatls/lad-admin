@@ -33,9 +33,10 @@ jobs:
           Compress-Archive -Path * -DestinationPath ..\..\..\..\..\lad_admin_update.zip
 
       - name: Compile Inno Setup Installer
-        uses: a-bentofreire/innosetup-action@v1.2.2
+        uses: crazy-max/ghaction-innosetup@v2
         with:
-          project-file: windows/runner/inno_setup.iss
+          script: windows/runner/inno_setup.iss
+          folder: windows/runner/Output
 
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2

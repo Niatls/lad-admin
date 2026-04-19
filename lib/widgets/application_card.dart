@@ -49,10 +49,9 @@ class _ApplicationCardState extends State<ApplicationCard> {
             ],
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(30), // slightly smaller to avoid bleed
+            borderRadius: BorderRadius.circular(30),
             child: Stack(
               children: [
-                // Background Gradient Header
                 Positioned(
                   top: 0,
                   left: 0,
@@ -79,69 +78,101 @@ class _ApplicationCardState extends State<ApplicationCard> {
                     hoverColor: Colors.transparent,
                     splashColor: const Color(0xFF4A6741).withOpacity(0.05),
                     child: Padding(
-                  padding: const EdgeInsets.all(24.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Header Row
-                      Row(
+                      padding: const EdgeInsets.all(24.0),
+                      child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Expanded(
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      app.source.toUpperCase(),
+                                      style: const TextStyle(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w700,
+                                        letterSpacing: 3,
+                                        color: Color(0xFF5D7453),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      app.name,
+                                      style: const TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.w800,
+                                        color: Color(0xFF1B2C16),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      '${app.gender ?? "Пол не указан"}${app.age != null ? ", ${app.age} лет" : ""}',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: const Color(0xFF1B2C16).withOpacity(0.55),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.9),
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(color: const Color(0xFFE8EDE4).withOpacity(0.5)),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.03),
+                                      blurRadius: 4,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    const Text(
+                                      "НОМЕР",
+                                      style: TextStyle(
+                                        fontSize: 9,
+                                        fontWeight: FontWeight.w700,
+                                        letterSpacing: 2,
+                                        color: Color(0x591B2C16),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      "#${app.id.toString().padLeft(4, '0')}",
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w700,
+                                        color: Color(0xFF1B2C16),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 20),
+                          Container(
+                            padding: const EdgeInsets.all(20),
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF9F7F2).withOpacity(0.7),
+                              borderRadius: BorderRadius.circular(24),
+                              border: Border.all(color: const Color(0xFFE8EDE4).withOpacity(0.3)),
+                            ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  app.source.toUpperCase(),
-                                  style: const TextStyle(
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w700,
-                                    letterSpacing: 3,
-                                    color: Color(0xFF5D7453),
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  app.name,
-                                  style: const TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.w800,
-                                    color: Color(0xFF1B2C16), // forest
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  '${app.gender ?? "Пол не указан"}${app.age != null ? ", ${app.age} лет" : ""}',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: const Color(0xFF1B2C16).withOpacity(0.55),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          
-                          // Application ID Badge
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.9),
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: const Color(0xFFE8EDE4).withOpacity(0.5)),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.03),
-                                  blurRadius: 4,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
                                 const Text(
-                                  "НОМЕР",
+                                  "ПРИЧИНА ОБРАЩЕНИЯ",
                                   style: TextStyle(
                                     fontSize: 9,
                                     fontWeight: FontWeight.w700,
@@ -149,95 +180,52 @@ class _ApplicationCardState extends State<ApplicationCard> {
                                     color: Color(0x591B2C16),
                                   ),
                                 ),
-                                const SizedBox(height: 4),
+                                const SizedBox(height: 12),
                                 Text(
-                                  "#${app.id.toString().padLeft(4, '0')}",
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w700,
-                                    color: Color(0xFF1B2C16),
+                                  app.reason,
+                                  maxLines: 3,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    height: 1.6,
+                                    color: const Color(0xFF1B2C16).withOpacity(0.8),
                                   ),
                                 ),
                               ],
                             ),
                           ),
+                          const SizedBox(height: 16),
+                          Wrap(
+                            spacing: 12,
+                            runSpacing: 12,
+                            children: [
+                              _buildMiniInfo("Время", app.preferredTime ?? "Любое"),
+                              _buildMiniInfo("Связь", app.contactMethod ?? "Не указан"),
+                              _buildMiniInfo("Дата", DateFormat('dd.MM.yyyy').format(app.createdAt)),
+                            ],
+                          ),
+                          const SizedBox(height: 20),
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.8),
+                              borderRadius: BorderRadius.circular(24),
+                              border: Border.all(color: const Color(0xFFE8EDE4).withOpacity(0.3)),
+                            ),
+                            child: _buildStatusRow(app.status),
+                          ),
                         ],
                       ),
-                      
-                      const SizedBox(height: 20),
-                      
-                      // Reason Section
-                      Container(
-                        padding: const EdgeInsets.all(20),
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF9F7F2).withOpacity(0.7),
-                          borderRadius: BorderRadius.circular(24),
-                          border: Border.all(color: const Color(0xFFE8EDE4).withOpacity(0.3)),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              "ПРИЧИНА ОБРАЩЕНИЯ",
-                              style: TextStyle(
-                                fontSize: 9,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: 2,
-                                color: Color(0x591B2C16),
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            Text(
-                              app.reason,
-                              maxLines: 3,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontSize: 13,
-                                height: 1.6,
-                                color: const Color(0xFF1B2C16).withOpacity(0.8),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      
-                      const SizedBox(height: 16),
-                      
-                      // Info Grid
-                      Wrap(
-                        spacing: 12,
-                        runSpacing: 12,
-                        children: [
-                          _buildMiniInfo("Время", app.preferredTime ?? "Любое"),
-                          _buildMiniInfo("Связь", app.contactMethod ?? "Не указан"),
-                          _buildMiniInfo("Дата", DateFormat('dd.MM.yyyy').format(app.createdAt)),
-                        ],
-                      ),
-                      
-                      const SizedBox(height: 20),
-                      
-                      // Footer Status
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.8),
-                          borderRadius: BorderRadius.circular(24),
-                          border: Border.all(color: const Color(0xFFE8EDE4).withOpacity(0.3)),
-                        ),
-                        child: _buildStatusRow(app.status),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
-              ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   Widget _buildMiniInfo(String label, String value) {
     return Container(

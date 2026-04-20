@@ -7,19 +7,33 @@ import 'package:lad_admin/core/api_client.dart';
 import 'package:lad_admin/core/speech_service.dart';
 import 'package:lad_admin/models/chat_session.dart';
 import 'package:lad_admin/models/chat_message.dart';
+import 'package:lad_admin/models/admin_chat_usage.dart';
 
 final apiClientProvider = Provider((ref) => ApiClient());
 
 /// Provider for the list of all chat sessions
 final chatSessionsProvider = StateNotifierProvider<ChatSessionsNotifier, AsyncValue<List<ChatSession>>>((ref) {
-  return ChatSessionsNotifier(ref.watch(apiClientProvider));
+  return ChatSessionsNotifier(ref.watch(apiClientProvider), ref);
 });
+
+/// Provider for a single session's details
+final sessionDetailsProvider = FutureProvider.family<ChatSession, int>((ref, sessionId) async {
+  final api = ref.watch(apiClientProvider);
+  final response = await api.get('/admin/chat/sessions');
+  final List<dynamic> data = response.data['sessions'];
+  final sessions = data.map((json) => ChatSession.fromJson(json)).toList();
+  return sessions.firstWhere((s) => s.id == sessionId);
+});
+
+/// Provider for chat usage statistics
+final chatUsageProvider = StateProvider<AdminChatUsage?>((ref) => null);
 
 class ChatSessionsNotifier extends StateNotifier<AsyncValue<List<ChatSession>>> {
   final ApiClient _api;
+  final Ref _ref;
   Timer? _timer;
 
-  ChatSessionsNotifier(this._api) : super(const AsyncValue.loading()) {
+  ChatSessionsNotifier(this._api, this._ref) : super(const AsyncValue.loading()) {
     fetchSessions();
     // Refresh sessions list every 30 seconds
     _timer = Timer.periodic(const Duration(seconds: 30), (_) => fetchSessions());
@@ -30,6 +44,11 @@ class ChatSessionsNotifier extends StateNotifier<AsyncValue<List<ChatSession>>> 
       final response = await _api.get('/admin/chat/sessions');
       final List<dynamic> data = response.data['sessions'];
       final sessions = data.map((json) => ChatSession.fromJson(json)).toList();
+      
+      if (response.data['usage'] != null) {
+        _ref.read(chatUsageProvider.notifier).state = AdminChatUsage.fromJson(response.data['usage']);
+      }
+      
       state = AsyncValue.data(sessions);
     } catch (e, st) {
       if (state is! AsyncData) {
@@ -116,10 +135,13 @@ class ChatMessagesNotifier extends StateNotifier<AsyncValue<List<ChatMessage>>> 
   }
 
   Future<bool> deleteMessage(int messageId) async {
+    return deleteMessages([messageId]);
+  }
+
+  Future<bool> deleteMessages(List<int> messageIds) async {
     try {
-      await _api.post('/admin/chat/delete-message', data: {
-        'messageId': messageId,
-        'sessionId': sessionId,
+      await _api.delete('/admin/chat/sessions/$sessionId/messages', data: {
+        'messageIds': messageIds,
       });
       await fetchMessages(quiet: true);
       return true;
@@ -127,6 +149,38 @@ class ChatMessagesNotifier extends StateNotifier<AsyncValue<List<ChatMessage>>> 
       return false;
     }
   }
+
+  Future<bool> archiveSession() async {
+    try {
+      await _api.delete('/admin/chat/sessions/$sessionId', data: {'mode': 'soft'});
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<bool> deleteSession() async {
+    try {
+      await _api.delete('/admin/chat/sessions/$sessionId', data: {'mode': 'hard'});
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<String?> generateVoiceToken() async {
+    try {
+      final response = await _api.post(
+        '/admin/chat/sessions/$sessionId/voice-token',
+        data: {'source': 'native'},
+      );
+
+      return response.data['token'];
+    } catch (e) {
+      return null;
+    }
+  }
+
 
   Future<bool> editMessage(int messageId, String newContent) async {
     try {

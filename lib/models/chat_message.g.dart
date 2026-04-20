@@ -15,6 +15,11 @@ ChatMessage _$ChatMessageFromJson(Map<String, dynamic> json) => ChatMessage(
   createdAt: DateTime.parse(json['createdAt'] as String),
   type: json['type'] as String? ?? 'text',
   metadata: json['metadata'] as Map<String, dynamic>?,
+  isDeleted: json['isDeleted'] as bool? ?? false,
+  deletedBy: json['deletedBy'] as String?,
+  deletedAt: json['deletedAt'] == null
+      ? null
+      : DateTime.parse(json['deletedAt'] as String),
 );
 
 Map<String, dynamic> _$ChatMessageToJson(ChatMessage instance) =>
@@ -27,6 +32,9 @@ Map<String, dynamic> _$ChatMessageToJson(ChatMessage instance) =>
       'createdAt': instance.createdAt.toIso8601String(),
       'type': instance.type,
       'metadata': instance.metadata,
+      'isDeleted': instance.isDeleted,
+      'deletedBy': instance.deletedBy,
+      'deletedAt': instance.deletedAt?.toIso8601String(),
     };
 
 VoiceMetadata _$VoiceMetadataFromJson(Map<String, dynamic> json) =>

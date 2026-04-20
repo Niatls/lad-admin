@@ -14,6 +14,9 @@ ChatSession _$ChatSessionFromJson(Map<String, dynamic> json) => ChatSession(
   lastMessage: json['lastMessage'] as String?,
   createdAt: DateTime.parse(json['createdAt'] as String),
   updatedAt: DateTime.parse(json['updatedAt'] as String),
+  archivedAt: json['archivedAt'] == null
+      ? null
+      : DateTime.parse(json['archivedAt'] as String),
 );
 
 Map<String, dynamic> _$ChatSessionToJson(ChatSession instance) =>
@@ -25,4 +28,5 @@ Map<String, dynamic> _$ChatSessionToJson(ChatSession instance) =>
       'lastMessage': instance.lastMessage,
       'createdAt': instance.createdAt.toIso8601String(),
       'updatedAt': instance.updatedAt.toIso8601String(),
+      'archivedAt': instance.archivedAt?.toIso8601String(),
     };

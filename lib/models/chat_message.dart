@@ -13,6 +13,9 @@ class ChatMessage {
   final DateTime createdAt;
   final String? type; // 'text', 'voice', etc.
   final Map<String, dynamic>? metadata;
+  final bool isDeleted;
+  final String? deletedBy;
+  final DateTime? deletedAt;
 
   ChatMessage({
     required this.id,
@@ -23,7 +26,11 @@ class ChatMessage {
     required this.createdAt,
     this.type = 'text',
     this.metadata,
+    this.isDeleted = false,
+    this.deletedBy,
+    this.deletedAt,
   });
+
 
   bool get isFromAdmin => sender == 'admin';
   bool get isFromVisitor => sender == 'visitor';

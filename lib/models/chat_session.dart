@@ -11,6 +11,7 @@ class ChatSession {
   final String? lastMessage;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final DateTime? archivedAt;
 
   ChatSession({
     required this.id,
@@ -20,7 +21,9 @@ class ChatSession {
     this.lastMessage,
     required this.createdAt,
     required this.updatedAt,
+    this.archivedAt,
   });
+
 
   factory ChatSession.fromJson(Map<String, dynamic> json) => _$ChatSessionFromJson(json);
   Map<String, dynamic> toJson() => _$ChatSessionToJson(this);

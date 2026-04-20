@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lad_admin/providers/chat_provider.dart';
+import 'package:lad_admin/models/chat_session.dart';
 import 'package:intl/intl.dart';
+
+
+import 'package:lad_admin/widgets/chat/usage_stats_card.dart';
 
 class ChatListScreen extends ConsumerWidget {
   const ChatListScreen({super.key});
@@ -10,55 +14,84 @@ class ChatListScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final sessionsState = ref.watch(chatSessionsProvider);
+    final usage = ref.watch(chatUsageProvider);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFDFBF7), // Cream
+      backgroundColor: const Color(0xFFFDFBF7),
       appBar: AppBar(
-        title: const Text('Сообщения', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text('Админ Чат', 
+          style: TextStyle(fontWeight: FontWeight.w800, fontSize: 24, letterSpacing: -0.5)
+        ),
+
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: false,
+        actions: [
+          IconButton(
+            onPressed: () => ref.read(chatSessionsProvider.notifier).fetchSessions(),
+            icon: const Icon(Icons.refresh_rounded),
+          ),
+          const SizedBox(width: 8),
+        ],
       ),
       body: sessionsState.when(
         data: (sessions) {
-          if (sessions.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.chat_bubble_outline, size: 64, color: Colors.grey[400]),
-                  const SizedBox(height: 16),
-                  Text('Нет активных чатов', style: TextStyle(color: Colors.grey[600], fontSize: 18)),
-                ],
-              ),
-            );
-          }
-
-          return ListView.separated(
-            padding: const EdgeInsets.all(16),
-            itemCount: sessions.length,
-            separatorBuilder: (context, index) => const SizedBox(height: 12),
-            itemBuilder: (context, index) {
-              final session = sessions[index];
-              return _ChatSessionTile(session: session);
-            },
+          return CustomScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            slivers: [
+              if (usage != null)
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                    child: UsageStatsCard(usage: usage),
+                  ),
+                ),
+              if (sessions.isEmpty)
+                SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.chat_bubble_outline, size: 64, color: Colors.grey[300]),
+                        const SizedBox(height: 16),
+                        Text('Нет активных диалогов', 
+                          style: TextStyle(color: Colors.grey[500], fontSize: 16, fontWeight: FontWeight.w500)
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              else
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  sliver: SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                        final session = sessions[index];
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: _ChatSessionTile(session: session),
+                        );
+                      },
+                      childCount: sessions.length,
+                    ),
+                  ),
+                ),
+            ],
           );
         },
         loading: () => const Center(child: CircularProgressIndicator(color: Color(0xFF2D4A3E))),
-        error: (err, stack) => Center(child: Text('Ошибка загрузки: $err')),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => ref.read(chatSessionsProvider.notifier).fetchSessions(),
-        backgroundColor: const Color(0xFF2D4A3E),
-        child: const Icon(Icons.refresh, color: Colors.white),
+        error: (err, stack) => Center(child: Text('Ошибка: $err')),
       ),
     );
   }
 }
 
 class _ChatSessionTile extends StatelessWidget {
-  final dynamic session;
+  final ChatSession session;
   const _ChatSessionTile({required this.session});
+
 
   @override
   Widget build(BuildContext context) {

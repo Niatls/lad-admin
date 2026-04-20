@@ -87,7 +87,7 @@ class VoiceCallService {
 
   Future<void> _pollSignals() async {
     try {
-      final response = await _api.get('/chat/voice/$token/signals', queryParameters: {
+      final response = await _api.get('/native/chat/voice/$token/signals', queryParameters: {
         'role': role,
         'after': _lastSignalId,
       });
@@ -99,7 +99,7 @@ class VoiceCallService {
       }
       
       // Also check if invite is still active
-      final inviteRes = await _api.get('/chat/voice/$token');
+      final inviteRes = await _api.get('/native/chat/voice/$token');
       // If 404/410, end call
     } catch (e) {
       // Handle error
@@ -133,7 +133,7 @@ class VoiceCallService {
   }
 
   Future<void> _postSignal(String type, dynamic payload) async {
-    await _api.post('/chat/voice/$token/signals', data: {
+    await _api.post('/native/chat/voice/$token/signals', data: {
       'role': role,
       'signalType': type,
       'payload': payload,

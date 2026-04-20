@@ -37,6 +37,14 @@ class _VoiceMessagePlayerState extends ConsumerState<VoiceMessagePlayer> {
 
   Future<void> _initPlayer() async {
     try {
+      // Suppress Windows plugin errors for unsupported features like speed/pitch adjustment
+      try {
+        await _player.setSpeed(1.0);
+        await _player.setPitch(1.0);
+      } catch (_) {
+        // Ignore internal plugin errors on Windows
+      }
+
       String url = widget.metadata.url;
       if (url.startsWith('/')) {
         url = 'https://lad-online.vercel.app$url';
@@ -46,6 +54,7 @@ class _VoiceMessagePlayerState extends ConsumerState<VoiceMessagePlayer> {
       debugPrint('Error loading audio: $e');
     }
   }
+
 
   Future<void> _startTranscription() async {
     setState(() => _isTranscribing = true);

@@ -171,9 +171,10 @@ class ChatMessagesNotifier extends StateNotifier<AsyncValue<List<ChatMessage>>> 
   Future<String?> generateVoiceToken() async {
     try {
       final response = await _api.post(
-        '/admin/chat/sessions/$sessionId/voice-token',
+        '/native/chat/sessions/$sessionId/voice-token',
         data: {'source': 'native'},
       );
+
 
       return response.data['token'];
     } catch (e) {
